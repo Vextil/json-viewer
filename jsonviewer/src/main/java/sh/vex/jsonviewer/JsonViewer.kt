@@ -35,26 +35,19 @@ class JsonViewer : LinearLayout {
     @ColorInt
     private var textColorNumber: Int = 0
     @Dimension
-    private var textSize: Int = 0
+    private var textSize: Float = 0f
 
-    constructor(context: Context) : super(context) {
+    constructor(context: Context) : this(context, null, 0)
 
-        if (isInEditMode)
-            initEditMode()
-    }
-
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
-        if (attrs != null)
-            init(context, attrs)
-        if (isInEditMode)
-            initEditMode()
-    }
+    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
-        if (attrs != null)
+        if (attrs != null) {
             init(context, attrs)
-        if (isInEditMode)
+        }
+        if (isInEditMode) {
             initEditMode()
+        }
     }
 
     private fun init(context: Context, attrs: AttributeSet?) {
@@ -64,7 +57,7 @@ class JsonViewer : LinearLayout {
             textColorNumber = attributes.getColor(R.styleable.JsonViewer_textColorNumber, ContextCompat.getColor(context, R.color.jsonViewer_textColorNumber))
             textColorBool = attributes.getColor(R.styleable.JsonViewer_textColorBool, ContextCompat.getColor(context, R.color.jsonViewer_textColorBool))
             textColorNull = attributes.getColor(R.styleable.JsonViewer_textColorNull, ContextCompat.getColor(context, R.color.jsonViewer_textColorNull))
-            textSize = attributes.getDimensionPixelSize(R.styleable.JsonViewer_textSize, resources.getDimensionPixelSize(R.dimen.text_size))
+            textSize = attributes.getDimension(R.styleable.JsonViewer_textSize, resources.getDimension(R.dimen.text_size))
         } finally {
             attributes.recycle()
         }
@@ -122,7 +115,7 @@ class JsonViewer : LinearLayout {
         textColorNull = color
     }
 
-    fun setTextSize(@Dimension size: Int) {
+    fun setTextSize(@Dimension(unit = Dimension.SP) size: Float) {
         textSize = size
     }
 
@@ -163,9 +156,7 @@ class JsonViewer : LinearLayout {
                     group.getChildAt(i + 2) is TextView) {
                 val groupChild = group.getChildAt(i + 1) as ViewGroup
                 groupChild.visibility = oldVisibility
-                //                groupChild.setLayoutTransition(null); // remove transition before mass change
                 group.getChildAt(i).callOnClick()
-                //                groupChild.setLayoutTransition(new LayoutTransition());
                 changeVisibility(group.getChildAt(i + 1) as ViewGroup, oldVisibility)
                 i += 2
             }
@@ -222,56 +213,43 @@ class JsonViewer : LinearLayout {
      * @return View group contain all the childs of the node.
      */
     private fun getJsonNodeChild(nodeKey: Any?, jsonNode: Any): ViewGroup {
-
-        val content = LinearLayout(context)
-
-        content.orientation = VERTICAL
-        content.setPadding(PADDING.toInt(), 0, 0, 0)
-        if (nodeKey != null) {
-            content.setBackgroundResource(R.drawable.background)
-        }
-        content.layoutTransition = LayoutTransition()
-
-        if (jsonNode is JSONObject) {
-            // setView key
-            val iterator = jsonNode.keys()
-            while (iterator.hasNext()) {
-                val key = iterator.next()
-                // set view list
-                try {
-                    addJsonNode(content, key, jsonNode.get(key), iterator.hasNext())
-                } catch (e: JSONException) {
-                    e.printStackTrace()
-                }
-
+        return LinearLayout(context).apply {
+            orientation = VERTICAL
+            setPadding(PADDING.toInt(), 0, 0, 0)
+            if (nodeKey != null) {
+                setBackgroundResource(R.drawable.background)
             }
-        } else if (jsonNode is JSONArray) {
-            // setView key
-            for (i in 0 until jsonNode.length()) {
-                // set view list
-                try {
-                    addJsonNode(content, i, jsonNode.get(i), i + 1 < jsonNode.length())
-                } catch (e: JSONException) {
-                    e.printStackTrace()
-                }
+            layoutTransition = LayoutTransition()
 
+            if (jsonNode is JSONObject) {
+                // setView key
+                val iterator = jsonNode.keys()
+                while (iterator.hasNext()) {
+                    val key = iterator.next()
+                    // set view list
+                    addJsonNode(this, key, jsonNode.get(key), iterator.hasNext())
+                }
+            } else if (jsonNode is JSONArray) {
+                // setView key
+                for (i in 0 until jsonNode.length()) {
+                    // set view list
+                    addJsonNode(this, i, jsonNode.get(i), i + 1 < jsonNode.length())
+                }
             }
         }
-        return content
     }
 
     private fun getHeader(key: Any?, jsonNode: Any?, haveNext: Boolean, childDisplayed: Boolean, haveChild: Boolean): TextView {
-        val textView = TextView(context)
-        textView.text = getHeaderText(key, jsonNode, haveNext, childDisplayed, haveChild)
-        TextViewCompat.setTextAppearance(textView, R.style.JsonViewer_TextAppearance)
-        textView.isFocusableInTouchMode = false
-        textView.isFocusable = false
-
-        return textView
+        return TextView(context).apply {
+            text = getHeaderText(key, jsonNode, haveNext, childDisplayed, haveChild)
+            TextViewCompat.setTextAppearance(this, R.style.JsonViewer_TextAppearance)
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, this@JsonViewer.textSize)
+            isFocusableInTouchMode = false
+            isFocusable = false
+        }
     }
 
     private fun getHeaderText(key: Any?, jsonNode: Any?, haveNext: Boolean, childDisplayed: Boolean, hasChild: Boolean): SpannableStringBuilder {
-
         return SpannableStringBuilder().apply {
             if (key is String) {
                 append("\"")
@@ -279,7 +257,6 @@ class JsonViewer : LinearLayout {
                 append("\"")
                 append(": ")
             }
-
             if (!childDisplayed) {
                 if (jsonNode is JSONArray) {
                     append("[ ... ]")
@@ -325,13 +302,13 @@ class JsonViewer : LinearLayout {
     }
 
     private fun getFooter(jsonNode: Any?, haveNext: Boolean): TextView {
-        val textView = TextView(context)
-        textView.text = getFooterText(jsonNode, haveNext)
-        TextViewCompat.setTextAppearance(textView, R.style.JsonViewer_TextAppearance)
-        textView.isFocusableInTouchMode = false
-        textView.isFocusable = false
-
-        return textView
+        return TextView(context).apply {
+            text = getFooterText(jsonNode, haveNext)
+            TextViewCompat.setTextAppearance(this, R.style.JsonViewer_TextAppearance)
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, this@JsonViewer.textSize)
+            isFocusableInTouchMode = false
+            isFocusable = false
+        }
     }
 
     private fun getFooterText(jsonNode: Any?, hasNext: Boolean): StringBuilder? {
