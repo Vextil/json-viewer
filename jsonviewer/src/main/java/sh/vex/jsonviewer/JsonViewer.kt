@@ -174,14 +174,18 @@ class JsonViewer : LinearLayout {
      */
     private fun addJsonNode(content: LinearLayout, nodeKey: Any?, jsonNode: Any, haveNext: Boolean) {
 
-        val hasChild = jsonNode is JSONObject && jsonNode.length() != 0 || jsonNode is JSONArray && jsonNode.length() != 0
+        val childCount = when (jsonNode) {
+            is JSONObject -> jsonNode.length()
+            is JSONArray -> jsonNode.length()
+            else -> 0
+        }
         val textViewHeader: TextView
 
-        textViewHeader = getHeader(nodeKey, jsonNode, haveNext, true, hasChild)
+        textViewHeader = getHeader(nodeKey, jsonNode, haveNext, true, childCount)
 
         content.addView(textViewHeader)
 
-        if (hasChild) {
+        if (childCount > 0) {
             val viewGroupChild = getJsonNodeChild(nodeKey, jsonNode)
             val textViewFooter = getFooter(jsonNode, haveNext)
 
@@ -198,7 +202,7 @@ class JsonViewer : LinearLayout {
                     newVisibility = View.VISIBLE
                     showChild = true
                 }
-                textViewHeader.text = getHeaderText(nodeKey, jsonNode, haveNext, showChild, hasChild)
+                textViewHeader.text = getHeaderText(nodeKey, jsonNode, haveNext, showChild, childCount)
                 viewGroupChild.visibility = newVisibility
                 textViewFooter.visibility = newVisibility
             }
@@ -239,9 +243,9 @@ class JsonViewer : LinearLayout {
         }
     }
 
-    private fun getHeader(key: Any?, jsonNode: Any?, haveNext: Boolean, childDisplayed: Boolean, haveChild: Boolean): TextView {
+    private fun getHeader(key: Any?, jsonNode: Any?, haveNext: Boolean, childDisplayed: Boolean, childCount: Int): TextView {
         return TextView(context).apply {
-            text = getHeaderText(key, jsonNode, haveNext, childDisplayed, haveChild)
+            text = getHeaderText(key, jsonNode, haveNext, childDisplayed, childCount)
             TextViewCompat.setTextAppearance(this, R.style.JsonViewer_TextAppearance)
             setTextSize(TypedValue.COMPLEX_UNIT_PX, this@JsonViewer.textSize)
             isFocusableInTouchMode = false
@@ -249,7 +253,7 @@ class JsonViewer : LinearLayout {
         }
     }
 
-    private fun getHeaderText(key: Any?, jsonNode: Any?, haveNext: Boolean, childDisplayed: Boolean, hasChild: Boolean): SpannableStringBuilder {
+    private fun getHeaderText(key: Any?, jsonNode: Any?, haveNext: Boolean, childDisplayed: Boolean, childCount: Int): SpannableStringBuilder {
         return SpannableStringBuilder().apply {
             if (key is String) {
                 append("\"")
@@ -259,6 +263,7 @@ class JsonViewer : LinearLayout {
             }
             if (!childDisplayed) {
                 if (jsonNode is JSONArray) {
+                    append("($childCount)", ForegroundColorSpan(textColorNull), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
                     append("[ ... ]")
                 } else if (jsonNode is JSONObject) {
                     append("{ ... }")
@@ -269,12 +274,12 @@ class JsonViewer : LinearLayout {
             } else {
                 if (jsonNode is JSONArray) {
                     append("[")
-                    if (!hasChild) {
+                    if (childCount == 0) {
                         append(getFooterText(jsonNode, haveNext))
                     }
                 } else if (jsonNode is JSONObject) {
                     append("{")
-                    if (!hasChild) {
+                    if (childCount == 0) {
                         append(getFooterText(jsonNode, haveNext))
                     }
                 } else if (jsonNode != null) {
