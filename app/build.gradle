@@ -5,7 +5,7 @@ apply plugin: 'kotlin-android'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "sh.vez.jsonviewer"
+        applicationId "sh.vex.jsonviewer"
         minSdkVersion 21
         targetSdkVersion 28
         versionCode 1

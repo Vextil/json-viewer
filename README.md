@@ -3,7 +3,7 @@ Andorid JSON Viewer
 
 With this library you can display JSON in an android view, you can click on an item to hide and show the sub tree.
 
-[![](https://jitpack.io/v/vextil/json-viewer.svg)](https://jitpack.io/#vextil/json-viewer)
+[![](https://img.shields.io/badge/dynamic/json.svg?label=bintray&query=name&style=for-the-badge&url=https%3A%2F%2Fapi.bintray.com%2Fpackages%2Fvextil%2Fmaven%2FJSON-Viewer%2Fversions%2F_latest)](https://bintray.com/vextil/maven/JSON-Viewer)
 
 Forked from: [Android JSON Viewer](https://github.com/pvarry/android-json-viewer)
 
@@ -11,36 +11,22 @@ Forked from: [Android JSON Viewer](https://github.com/pvarry/android-json-viewer
 
 **Gradle**
 
-- **Project level `build.gradle`**
-```gradle
-allprojects {
-    repositories {
-        maven { url 'https://jitpack.io' }
-    }
-}
 ```
 - **App level `build.gradle`**
 ```gradle
 dependencies {
-    implementation 'com.github.vextil:json-viewer:v1.0'
+    implementation 'sh.vex:jsonviewer:1.0.0'
 }
 ```
 
 **Maven**
 
 ```xml
-<!-- <repositories> section of pom.xml -->
-<repository>
-    <id>jitpack.io</id>
-   <url>https://jitpack.io</url>
-</repository>
-
-
 <!-- <dependencies> section of pom.xml -->
 <dependency>
-    <groupId>com.github.vextil</groupId>
-    <artifactId>json-viewer</artifactId>
-    <version>v1.0</version>
+    <groupId>sh.vex</groupId>
+    <artifactId>jsonviewer</artifactId>
+    <version>1.0.0</version>
 </dependency>
 ```
 
@@ -73,7 +59,7 @@ dependencies {
 
 `void setTextColorNull(@ColorInt int color)`
 
-## Examples :+1:
+## Examples
 
 **Default view**
 
