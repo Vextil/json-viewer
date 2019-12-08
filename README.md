@@ -11,8 +11,6 @@ Forked from: [Android JSON Viewer](https://github.com/pvarry/android-json-viewer
 
 **Gradle**
 
-```
-- **App level `build.gradle`**
 ```gradle
 dependencies {
     implementation 'sh.vex:jsonviewer:1.0.0'
